@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://hotel-room-reservation-system-backe.vercel.app/';
 
 export interface Room {
   room_number: number;
