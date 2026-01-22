@@ -317,6 +317,21 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="app-footer">
+        <p>
+          Designed and Implemented by{' '}
+          <a 
+            href="https://theayushgupta08.online" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            Ayush Gupta
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
