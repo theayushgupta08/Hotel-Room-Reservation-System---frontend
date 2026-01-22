@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://hotel-room-reservation-system-backe.vercel.app';
+// const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export interface Room {
   room_number: number;
@@ -20,11 +21,20 @@ export interface BookingRequest {
   guest_id?: string;
 }
 
+export interface RoomPathInfo {
+  room_number: number;
+  floor: number;
+  position: number;
+  steps: string[];
+  total_time: number;
+}
+
 export interface BookingResponse {
   success: boolean;
   message: string;
   booked_rooms: number[];
   total_travel_time?: number;
+  room_paths?: RoomPathInfo[];
 }
 
 export interface MessageResponse {

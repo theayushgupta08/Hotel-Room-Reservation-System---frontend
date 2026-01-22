@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { api } from './services/api';
-import type { BookingResponse } from './services/api';
+import type { BookingResponse, RoomPathInfo } from './services/api';
 
 interface RoomData {
   room_number: number;
@@ -22,6 +22,8 @@ function App() {
     available_rooms: 97,
     booked_rooms: 0,
   });
+  const [showPathDialog, setShowPathDialog] = useState(false);
+  const [roomPaths, setRoomPaths] = useState<RoomPathInfo[]>([]);
 
   // Initialize rooms data structure
   const initializeRooms = () => {
@@ -97,6 +99,12 @@ function App() {
         'success'
       );
       await fetchRooms();
+      
+      // Show path dialog if room paths are available
+      if (response.room_paths && response.room_paths.length > 0) {
+        setRoomPaths(response.room_paths);
+        setShowPathDialog(true);
+      }
     } catch (error) {
       showMessage(error instanceof Error ? error.message : 'Failed to book rooms', 'error');
     } finally {
@@ -161,27 +169,36 @@ function App() {
       
       {/* Control Panel */}
       <div className="control-panel">
-        <div className="input-group">
-          <label htmlFor="numRooms">No of Rooms:</label>
-          <input
-            id="numRooms"
-            type="number"
-            min="1"
-            max="5"
-            value={numRooms}
-            onChange={(e) => setNumRooms(e.target.value)}
-            disabled={loading}
-          />
+        <div className="input-section">
+          <div className="input-group">
+            <label htmlFor="numRooms">No of Rooms:</label>
+            <input
+              id="numRooms"
+              type="number"
+              min="1"
+              max="5"
+              value={numRooms}
+              onChange={(e) => setNumRooms(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+          <div className="input-note">
+            Maximum 5 rooms can be booked at a time
+          </div>
         </div>
-        <button onClick={handleBook} disabled={loading} className="btn btn-primary">
-          Book
-        </button>
-        <button onClick={handleReset} disabled={loading} className="btn btn-secondary">
-          Reset
-        </button>
-        <button onClick={handleRandom} disabled={loading} className="btn btn-secondary">
-          Random
-        </button>
+        <div className="button-group">
+          <button onClick={handleBook} disabled={loading} className="btn btn-primary">
+            {loading ? '⏳' : '📋'} {loading ? 'Booking...' : 'Book Rooms'}
+          </button>
+          <div className="secondary-buttons">
+            <button onClick={handleReset} disabled={loading} className="btn btn-secondary">
+              🔄 Reset
+            </button>
+            <button onClick={handleRandom} disabled={loading} className="btn btn-secondary">
+              🎲 Random Occupancy
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Message Display */}
@@ -191,9 +208,15 @@ function App() {
 
       {/* Statistics */}
       <div className="statistics">
-        <span>Total: {statistics.total_rooms}</span>
-        <span>Available: {statistics.available_rooms}</span>
-        <span>Booked: {statistics.booked_rooms}</span>
+        <span>
+          <strong>Total:</strong> {statistics.total_rooms}
+        </span>
+        <span>
+          <strong>Available:</strong> {statistics.available_rooms}
+        </span>
+        <span>
+          <strong>Booked:</strong> {statistics.booked_rooms}
+        </span>
       </div>
 
       {/* Hotel Layout */}
@@ -221,6 +244,18 @@ function App() {
               </div>
             );
           })}
+          
+          {/* Ground Floor - Reception */}
+          <div className="floor-row reception-row">
+            <div className="floor-label">Ground Floor</div>
+            <div className="reception-area">
+              <div className="reception-content">
+                <span className="reception-icon">🏨</span>
+                <span className="reception-text">Reception</span>
+                <span className="reception-subtext">(Starting Point)</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -235,6 +270,53 @@ function App() {
           <span>Booked</span>
         </div>
       </div>
+
+      {/* Path Dialog */}
+      {showPathDialog && (
+        <div className="dialog-overlay" onClick={() => setShowPathDialog(false)}>
+          <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+            <div className="dialog-header">
+              <h2>Path to Your Rooms</h2>
+              <button className="dialog-close" onClick={() => setShowPathDialog(false)}>
+                ×
+              </button>
+            </div>
+            <div className="dialog-body">
+              <p className="dialog-subtitle">
+                Directions from Reception (Ground Floor) to your booked rooms:
+              </p>
+              {roomPaths.map((path, index) => (
+                <div key={path.room_number} className="room-path-card">
+                  <div className="room-path-header">
+                    <h3>Room {path.room_number}</h3>
+                    <span className="travel-time-badge">
+                      {path.total_time} minute{path.total_time !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="room-path-details">
+                    <p className="room-location">
+                      Floor {path.floor}, Position {path.position}
+                    </p>
+                    <div className="path-steps">
+                      <h4>Directions:</h4>
+                      <ol>
+                        {path.steps.map((step, stepIndex) => (
+                          <li key={stepIndex}>{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="dialog-footer">
+              <button className="btn btn-primary" onClick={() => setShowPathDialog(false)}>
+                ✓ Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
