@@ -285,7 +285,7 @@ function App() {
               <p className="dialog-subtitle">
                 Directions from Reception (Ground Floor) to your booked rooms:
               </p>
-              {roomPaths.map((path, index) => (
+              {roomPaths.map((path) => (
                 <div key={path.room_number} className="room-path-card">
                   <div className="room-path-header">
                     <h3>Room {path.room_number}</h3>
